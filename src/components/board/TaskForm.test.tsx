@@ -2,13 +2,16 @@ import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import { TaskForm } from './TaskForm'
-import type { Task } from '../../types'
+import type { Task, BoardColumn } from '../../types'
+
+const mockColumn: BoardColumn = { id: 'col-todo', title: 'A Fazer', color: 'blue' }
+const mockColumns: BoardColumn[] = [mockColumn]
 
 const mockTask: Task = {
   id: '1',
   title: 'Tarefa Original',
   description: 'Descrição original',
-  status: 'todo',
+  columnId: 'col-todo',
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-01T00:00:00.000Z',
 }
@@ -20,6 +23,7 @@ describe('TaskForm', () => {
         isOpen={true}
         onClose={() => {}}
         onSubmit={() => {}}
+        columns={mockColumns}
         submitLabel="Criar"
       />
     )
@@ -35,6 +39,7 @@ describe('TaskForm', () => {
         isOpen={true}
         onClose={() => {}}
         onSubmit={() => {}}
+        columns={mockColumns}
         initialTask={mockTask}
         submitLabel="Salvar"
       />
@@ -52,6 +57,7 @@ describe('TaskForm', () => {
         isOpen={true}
         onClose={() => {}}
         onSubmit={() => {}}
+        columns={mockColumns}
         submitLabel="Criar"
       />
     )
@@ -72,6 +78,7 @@ describe('TaskForm', () => {
           submittedTitle = title
           submittedDesc = description
         }}
+        columns={mockColumns}
         submitLabel="Criar"
       />
     )
@@ -91,6 +98,7 @@ describe('TaskForm', () => {
         isOpen={true}
         onClose={() => {}}
         onSubmit={() => {}}
+        columns={mockColumns}
         submitLabel="Criar"
       />
     )

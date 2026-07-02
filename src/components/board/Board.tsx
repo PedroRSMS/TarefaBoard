@@ -8,24 +8,43 @@ import {
   type DragStartEvent,
   type DragEndEvent,
 } from '@dnd-kit/core'
-import type { Task, TaskStatus } from '../../types'
-import { STATUS_ORDER } from '../../constants/status'
+import type { Task, BoardColumn, ColumnColor } from '../../types'
 import { Column } from './Column'
 import { TaskCard } from './TaskCard'
 import { TaskForm } from './TaskForm'
+import { ColumnForm } from './ColumnForm'
 import { ConfirmDeleteModal } from './ConfirmDeleteModal'
+import { ConfirmDeleteColumnModal } from './ConfirmDeleteColumnModal'
 
 interface BoardProps {
   tasks: Task[]
-  selectedStatuses: TaskStatus[]
-  onUpdateTask: (task: Task, changes: { title?: string; description?: string; status?: TaskStatus }) => void
+  columns: BoardColumn[]
+  selectedColumnIds: string[]
+  onUpdateTask: (task: Task, changes: { title?: string; description?: string; columnId?: string }) => void
   onDeleteTask: (id: string) => void
+  onAddColumn: (title: string, color: ColumnColor) => void
+  onUpdateColumn: (column: BoardColumn) => void
+  onDeleteColumn: (id: string) => void
 }
 
-export function Board({ tasks, selectedStatuses, onUpdateTask, onDeleteTask }: BoardProps) {
+export function Board({
+  tasks,
+  columns,
+  selectedColumnIds,
+  onUpdateTask,
+  onDeleteTask,
+  onAddColumn,
+  onUpdateColumn,
+  onDeleteColumn,
+}: BoardProps) {
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [deletingTask, setDeletingTask] = useState<Task | null>(null)
   const [activeTask, setActiveTask] = useState<Task | null>(null)
+  const [isColumnFormOpen, setIsColumnFormOpen] = useState(false)
+  const [editingColumn, setEditingColumn] = useState<BoardColumn | null>(null)
+  const [deletingColumn, setDeletingColumn] = useState<BoardColumn | null>(null)
+
+  const visibleColumns = columns.filter((c) => selectedColumnIds.includes(c.id))
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -35,18 +54,34 @@ export function Board({ tasks, selectedStatuses, onUpdateTask, onDeleteTask }: B
     })
   )
 
-  function getTasksByStatus(status: TaskStatus): Task[] {
-    return tasks.filter((task) => task.status === status)
+  function getTasksByColumn(columnId: string): Task[] {
+    return tasks.filter((task) => task.columnId === columnId)
   }
 
-  function handleUpdate(task: Task, title: string, description: string, status: TaskStatus) {
-    onUpdateTask(task, { title, description, status })
+  function handleUpdate(task: Task, title: string, description: string, columnId: string) {
+    onUpdateTask(task, { title, description, columnId })
   }
 
   function handleDeleteConfirm() {
     if (deletingTask) {
       onDeleteTask(deletingTask.id)
       setDeletingTask(null)
+    }
+  }
+
+  function handleDeleteColumnConfirm() {
+    if (deletingColumn) {
+      onDeleteColumn(deletingColumn.id)
+      setDeletingColumn(null)
+    }
+  }
+
+  function handleColumnSubmit(title: string, color: ColumnColor) {
+    if (editingColumn) {
+      onUpdateColumn({ ...editingColumn, title, color })
+      setEditingColumn(null)
+    } else {
+      onAddColumn(title, color)
     }
   }
 
@@ -66,13 +101,13 @@ export function Board({ tasks, selectedStatuses, onUpdateTask, onDeleteTask }: B
     const task = tasks.find((t) => t.id === active.id)
     if (!task) return
 
-    const newStatus = over.id as TaskStatus
-    if (newStatus === task.status) return
+    const newColumnId = over.id as string
+    if (newColumnId === task.columnId) return
 
-    onUpdateTask(task, { status: newStatus })
+    onUpdateTask(task, { columnId: newColumnId })
   }
 
-  if (selectedStatuses.length === 0) {
+  if (selectedColumnIds.length === 0) {
     return (
       <div className="flex-1 px-4 sm:px-8 py-4 sm:py-6 overflow-auto flex items-center justify-center">
         <p className="text-slate-400 text-lg">Selecione ao menos um status</p>
@@ -87,25 +122,41 @@ export function Board({ tasks, selectedStatuses, onUpdateTask, onDeleteTask }: B
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        {tasks.length === 0 ? (
+        {tasks.length === 0 && (
           <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <p className="text-slate-400 text-lg mb-2">
+            <div className="text-center space-y-4">
+              <p className="text-slate-400 text-lg">
                 Nenhuma tarefa encontrada para os filtros atuais
               </p>
+              <button
+                onClick={() => setIsColumnFormOpen(true)}
+                className="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300 text-sm transition-colors duration-200"
+              >
+                + Nova Coluna
+              </button>
             </div>
           </div>
-        ) : (
+        )}
+
+        {tasks.length > 0 && (
           <div className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-            {STATUS_ORDER.map((status) => (
+            {visibleColumns.map((column) => (
               <Column
-                key={status}
-                status={status}
-                tasks={getTasksByStatus(status)}
+                key={column.id}
+                column={column}
+                tasks={getTasksByColumn(column.id)}
                 onEdit={setEditingTask}
                 onDelete={setDeletingTask}
+                onEditColumn={setEditingColumn}
+                onDeleteColumn={setDeletingColumn}
               />
             ))}
+            <button
+              onClick={() => setIsColumnFormOpen(true)}
+              className="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 rounded-xl min-h-[300px] hover:border-slate-500 hover:bg-slate-800/30 transition-colors duration-200"
+            >
+              <span className="text-slate-500 text-lg">+ Nova Coluna</span>
+            </button>
           </div>
         )}
 
@@ -127,9 +178,10 @@ export function Board({ tasks, selectedStatuses, onUpdateTask, onDeleteTask }: B
         <TaskForm
           isOpen={true}
           onClose={() => setEditingTask(null)}
-          onSubmit={(title, description, status) =>
-            handleUpdate(editingTask, title, description, status)
+          onSubmit={(title, description, columnId) =>
+            handleUpdate(editingTask, title, description, columnId)
           }
+          columns={columns}
           initialTask={editingTask}
           submitLabel="Salvar"
         />
@@ -140,6 +192,29 @@ export function Board({ tasks, selectedStatuses, onUpdateTask, onDeleteTask }: B
         onClose={() => setDeletingTask(null)}
         onConfirm={handleDeleteConfirm}
         taskTitle={deletingTask?.title ?? ''}
+      />
+
+      <ColumnForm
+        isOpen={isColumnFormOpen}
+        onClose={() => setIsColumnFormOpen(false)}
+        onSubmit={handleColumnSubmit}
+      />
+
+      {editingColumn && (
+        <ColumnForm
+          isOpen={true}
+          onClose={() => setEditingColumn(null)}
+          onSubmit={handleColumnSubmit}
+          initialColumn={editingColumn}
+        />
+      )}
+
+      <ConfirmDeleteColumnModal
+        isOpen={deletingColumn !== null}
+        onClose={() => setDeletingColumn(null)}
+        onConfirm={handleDeleteColumnConfirm}
+        columnTitle={deletingColumn?.title ?? ''}
+        taskCount={tasks.filter((t) => t.columnId === deletingColumn?.id).length}
       />
     </div>
   )

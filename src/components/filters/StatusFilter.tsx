@@ -1,37 +1,40 @@
-import type { TaskStatus } from '../../types'
-import { STATUS_LABELS, STATUS_COLORS, STATUS_ORDER } from '../../constants/status'
+import type { BoardColumn } from '../../types'
+import { COLUMN_COLOR_CHIP } from '../../constants/status'
+import { COLUMN_COLOR_DOT } from '../../constants/status'
 
 interface StatusFilterProps {
-  selected: TaskStatus[]
-  onChange: (selected: TaskStatus[]) => void
+  columns: BoardColumn[]
+  selectedIds: string[]
+  onChange: (selectedIds: string[]) => void
 }
 
-export function StatusFilter({ selected, onChange }: StatusFilterProps) {
-  function toggleStatus(status: TaskStatus) {
-    if (selected.includes(status)) {
-      onChange(selected.filter((s) => s !== status))
+export function StatusFilter({ columns, selectedIds, onChange }: StatusFilterProps) {
+  function toggleColumn(id: string) {
+    if (selectedIds.includes(id)) {
+      onChange(selectedIds.filter((s) => s !== id))
     } else {
-      onChange([...selected, status])
+      onChange([...selectedIds, id])
     }
   }
 
   return (
     <div className="flex flex-wrap gap-2">
-      {STATUS_ORDER.map((status) => {
-        const isActive = selected.includes(status)
+      {columns.map((col) => {
+        const isActive = selectedIds.includes(col.id)
         return (
           <button
-            key={status}
-            onClick={() => toggleStatus(status)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors duration-200 ${
+            key={col.id}
+            onClick={() => toggleColumn(col.id)}
+            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors duration-200 flex items-center gap-1.5 ${
               isActive
-                ? STATUS_COLORS[status]
+                ? COLUMN_COLOR_CHIP[col.color]
                 : 'bg-slate-800 text-slate-400 border-slate-700 hover:border-slate-600 hover:text-slate-300'
             }`}
             aria-pressed={isActive}
-            aria-label={`Filtrar ${STATUS_LABELS[status]}`}
+            aria-label={`Filtrar ${col.title}`}
           >
-            {STATUS_LABELS[status]}
+            <span className={`w-2 h-2 rounded-full ${COLUMN_COLOR_DOT[col.color]}`} />
+            {col.title}
           </button>
         )
       })}

@@ -3,17 +3,22 @@ import { render, screen } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import { useState } from 'react'
 import { FiltersBar } from './FiltersBar'
-import type { TaskStatus } from '../../types'
+import type { BoardColumn } from '../../types'
+
+const mockColumns: BoardColumn[] = [
+  { id: 'col-todo', title: 'A Fazer', color: 'blue' },
+]
 
 function TestFiltersBar() {
   const [search, setSearch] = useState('')
-  const [statuses, setStatuses] = useState<TaskStatus[]>(['todo', 'in-progress', 'done'])
+  const [ids, setIds] = useState<string[]>(['col-todo'])
   return (
     <FiltersBar
       search={search}
       onSearchChange={setSearch}
-      selectedStatuses={statuses}
-      onStatusesChange={setStatuses}
+      columns={mockColumns}
+      selectedColumnIds={ids}
+      onColumnIdsChange={setIds}
     />
   )
 }
@@ -23,8 +28,6 @@ describe('FiltersBar', () => {
     render(<TestFiltersBar />)
     expect(screen.getByPlaceholderText('Buscar tarefas...')).toBeDefined()
     expect(screen.getByText('A Fazer')).toBeDefined()
-    expect(screen.getByText('Em Progresso')).toBeDefined()
-    expect(screen.getByText('Concluído')).toBeDefined()
   })
 
   it('deve permitir digitar na busca', async () => {

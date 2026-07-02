@@ -9,7 +9,7 @@ const mockTask: Task = {
   id: '1',
   title: 'Minha Tarefa',
   description: 'Descrição da tarefa',
-  status: 'todo',
+  columnId: 'col-todo',
   createdAt: '2024-01-15T10:30:00.000Z',
   updatedAt: '2024-01-15T10:30:00.000Z',
 }

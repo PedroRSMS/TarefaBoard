@@ -2,14 +2,16 @@ import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { DndContext } from '@dnd-kit/core'
 import { Column } from './Column'
-import type { Task } from '../../types'
+import type { Task, BoardColumn } from '../../types'
+
+const mockColumn: BoardColumn = { id: 'col-todo', title: 'A Fazer', color: 'blue' }
 
 const mockTasks: Task[] = [
   {
     id: '1',
     title: 'Tarefa 1',
     description: '',
-    status: 'todo',
+    columnId: 'col-todo',
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
   },
@@ -17,7 +19,7 @@ const mockTasks: Task[] = [
     id: '2',
     title: 'Tarefa 2',
     description: '',
-    status: 'todo',
+    columnId: 'col-todo',
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
   },
@@ -34,28 +36,28 @@ function renderWithDnd(ui: React.ReactElement) {
 describe('Column', () => {
   it('deve renderizar o nome da coluna', () => {
     renderWithDnd(
-      <Column status="todo" tasks={[]} onEdit={() => {}} onDelete={() => {}} />
+      <Column column={mockColumn} tasks={[]} onEdit={() => {}} onDelete={() => {}} onEditColumn={() => {}} onDeleteColumn={() => {}} />
     )
     expect(screen.getByText('A Fazer')).toBeDefined()
   })
 
   it('deve renderizar o contador de tarefas', () => {
     renderWithDnd(
-      <Column status="todo" tasks={mockTasks} onEdit={() => {}} onDelete={() => {}} />
+      <Column column={mockColumn} tasks={mockTasks} onEdit={() => {}} onDelete={() => {}} onEditColumn={() => {}} onDeleteColumn={() => {}} />
     )
     expect(screen.getByText('2')).toBeDefined()
   })
 
   it('deve mostrar mensagem quando vazia', () => {
     renderWithDnd(
-      <Column status="todo" tasks={[]} onEdit={() => {}} onDelete={() => {}} />
+      <Column column={mockColumn} tasks={[]} onEdit={() => {}} onDelete={() => {}} onEditColumn={() => {}} onDeleteColumn={() => {}} />
     )
     expect(screen.getByText('Nenhuma tarefa neste status')).toBeDefined()
   })
 
   it('deve renderizar os cards das tarefas', () => {
     renderWithDnd(
-      <Column status="todo" tasks={mockTasks} onEdit={() => {}} onDelete={() => {}} />
+      <Column column={mockColumn} tasks={mockTasks} onEdit={() => {}} onDelete={() => {}} onEditColumn={() => {}} onDeleteColumn={() => {}} />
     )
     expect(screen.getByText('Tarefa 1')).toBeDefined()
     expect(screen.getByText('Tarefa 2')).toBeDefined()

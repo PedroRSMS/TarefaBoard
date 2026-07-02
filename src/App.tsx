@@ -1,6 +1,4 @@
 import { useState, useMemo, useCallback } from 'react'
-import type { TaskStatus } from './types'
-import { STATUS_ORDER } from './constants/status'
 import { TaskProvider } from './components/TaskProvider'
 import { useTaskContext } from './hooks/useTaskContext'
 import { useDebounce } from './hooks/useDebounce'
@@ -10,28 +8,39 @@ import { TaskForm } from './components/board/TaskForm'
 import { FiltersBar } from './components/filters/FiltersBar'
 
 function AppContent() {
-  const { tasks, addTask, updateTask, deleteTask } = useTaskContext()
+  const {
+    tasks,
+    columns,
+    addTask,
+    updateTask,
+    deleteTask,
+    addColumn,
+    updateColumn,
+    deleteColumn,
+  } = useTaskContext()
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [search, setSearch] = useState('')
-  const [selectedStatuses, setSelectedStatuses] = useState<TaskStatus[]>([...STATUS_ORDER])
+  const [selectedColumnIds, setSelectedColumnIds] = useState<string[]>(
+    () => columns.map((c) => c.id)
+  )
 
   const debouncedSearch = useDebounce(search, 300)
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
-      const matchesStatus = selectedStatuses.includes(task.status)
-      if (!matchesStatus) return false
+      const matchesColumn = selectedColumnIds.includes(task.columnId)
+      if (!matchesColumn) return false
 
       if (debouncedSearch.trim() === '') return true
 
       return task.title.toLowerCase().includes(debouncedSearch.toLowerCase().trim())
     })
-  }, [tasks, selectedStatuses, debouncedSearch])
+  }, [tasks, selectedColumnIds, debouncedSearch])
 
   const handleCreate = useCallback(
-    (title: string, description: string) => {
-      addTask(title, description)
+    (title: string, description: string, columnId: string) => {
+      addTask(title, description, columnId)
     },
     [addTask]
   )
@@ -54,21 +63,27 @@ function AppContent() {
       <FiltersBar
         search={search}
         onSearchChange={setSearch}
-        selectedStatuses={selectedStatuses}
-        onStatusesChange={setSelectedStatuses}
+        columns={columns}
+        selectedColumnIds={selectedColumnIds}
+        onColumnIdsChange={setSelectedColumnIds}
       />
 
       <Board
         tasks={filteredTasks}
-        selectedStatuses={selectedStatuses}
+        columns={columns}
+        selectedColumnIds={selectedColumnIds}
         onUpdateTask={updateTask}
         onDeleteTask={deleteTask}
+        onAddColumn={addColumn}
+        onUpdateColumn={updateColumn}
+        onDeleteColumn={deleteColumn}
       />
 
       <TaskForm
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreate}
+        columns={columns}
         submitLabel="Criar"
       />
     </div>

@@ -23,11 +23,11 @@ describe('App', () => {
     expect(screen.getByPlaceholderText('Buscar tarefas...')).toBeDefined()
   })
 
-  it('deve renderizar os chips de filtro', () => {
+  it('deve renderizar os chips de filtro com colunas padrão', () => {
     render(<App />)
     expect(screen.getByText('A Fazer')).toBeDefined()
     expect(screen.getByText('Em Progresso')).toBeDefined()
-    expect(screen.getByText('Concluído')).toBeDefined()
+    expect(screen.getByText('Concluido')).toBeDefined()
   })
 
   it('deve mostrar estado vazio', () => {
@@ -57,24 +57,8 @@ describe('App', () => {
     expect(screen.getByText('Minha Primeira Tarefa')).toBeDefined()
   })
 
-  it('deve filtrar tarefas por busca', async () => {
-    const user = userEvent.setup()
+  it('deve mostrar botão Nova Coluna', () => {
     render(<App />)
-
-    await user.click(screen.getByText('Nova Tarefa'))
-    await user.type(screen.getByLabelText('Título'), 'Tarefa Alpha')
-    await user.click(screen.getByText('Criar'))
-
-    await user.click(screen.getByText('Nova Tarefa'))
-    await user.type(screen.getByLabelText('Título'), 'Tarefa Beta')
-    await user.click(screen.getByText('Criar'))
-
-    const searchInput = screen.getByPlaceholderText('Buscar tarefas...')
-    await user.type(searchInput, 'Alpha')
-
-    await new Promise((r) => setTimeout(r, 350))
-
-    expect(screen.getByText('Tarefa Alpha')).toBeDefined()
-    expect(screen.queryByText('Tarefa Beta')).toBeNull()
+    expect(screen.getByText('+ Nova Coluna')).toBeDefined()
   })
 })

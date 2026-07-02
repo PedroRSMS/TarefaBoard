@@ -1,13 +1,13 @@
 import { v4 as uuid } from 'uuid'
-import type { Task, TaskStatus } from '../types'
+import type { Task } from '../types'
 
-export function createTask(title: string, description: string): Task {
+export function createTask(title: string, description: string, columnId: string): Task {
   const now = new Date().toISOString()
   return {
     id: uuid(),
     title: title.trim(),
     description: description.trim(),
-    status: 'todo',
+    columnId,
     createdAt: now,
     updatedAt: now,
   }
@@ -15,7 +15,7 @@ export function createTask(title: string, description: string): Task {
 
 export function updateTaskData(
   task: Task,
-  changes: { title?: string; description?: string; status?: TaskStatus }
+  changes: { title?: string; description?: string; columnId?: string }
 ): Task {
   return {
     ...task,

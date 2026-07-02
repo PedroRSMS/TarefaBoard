@@ -1,13 +1,13 @@
 import { useState, type FormEvent } from 'react'
-import type { Task, TaskStatus } from '../../types'
-import { STATUS_LABELS, STATUS_ORDER } from '../../constants/status'
+import type { Task, BoardColumn } from '../../types'
 import { validateTitle, validateDescription } from '../../utils/taskUtils'
 import { Modal } from '../ui/Modal'
 
 interface TaskFormProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (title: string, description: string, status: TaskStatus) => void
+  onSubmit: (title: string, description: string, columnId: string) => void
+  columns: BoardColumn[]
   initialTask?: Task
   submitLabel: string
 }
@@ -16,12 +16,14 @@ export function TaskForm({
   isOpen,
   onClose,
   onSubmit,
+  columns,
   initialTask,
   submitLabel,
 }: TaskFormProps) {
+  const defaultColumnId = initialTask?.columnId ?? columns[0]?.id ?? ''
   const [title, setTitle] = useState(initialTask?.title ?? '')
   const [description, setDescription] = useState(initialTask?.description ?? '')
-  const [status, setStatus] = useState<TaskStatus>(initialTask?.status ?? 'todo')
+  const [columnId, setColumnId] = useState(defaultColumnId)
 
   const titleError = validateTitle(title)
   const descriptionError = validateDescription(description)
@@ -30,11 +32,11 @@ export function TaskForm({
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!isValid) return
-    onSubmit(title.trim(), description.trim(), status)
+    onSubmit(title.trim(), description.trim(), columnId)
     if (!initialTask) {
       setTitle('')
       setDescription('')
-      setStatus('todo')
+      setColumnId(columns[0]?.id ?? '')
     }
     onClose()
   }
@@ -42,12 +44,14 @@ export function TaskForm({
   function handleClose() {
     setTitle(initialTask?.title ?? '')
     setDescription(initialTask?.description ?? '')
-    setStatus(initialTask?.status ?? 'todo')
+    setColumnId(defaultColumnId)
     onClose()
   }
 
+  const isEditing = !!initialTask
+
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title={initialTask ? 'Editar Tarefa' : 'Nova Tarefa'}>
+    <Modal isOpen={isOpen} onClose={handleClose} title={isEditing ? 'Editar Tarefa' : 'Nova Tarefa'}>
       <form onSubmit={handleSubmit}>
         <div className="px-6 py-4 space-y-4">
           <div>
@@ -93,25 +97,23 @@ export function TaskForm({
             )}
           </div>
 
-          {initialTask && (
-            <div>
-              <label htmlFor="task-status" className="block text-sm font-medium text-slate-300 mb-1">
-                Status
-              </label>
-              <select
-                id="task-status"
-                value={status}
-                onChange={(e) => setStatus(e.target.value as TaskStatus)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-slate-50 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
-              >
-                {STATUS_ORDER.map((s) => (
-                  <option key={s} value={s}>
-                    {STATUS_LABELS[s]}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          <div>
+            <label htmlFor="task-status" className="block text-sm font-medium text-slate-300 mb-1">
+              Coluna
+            </label>
+            <select
+              id="task-status"
+              value={columnId}
+              onChange={(e) => setColumnId(e.target.value)}
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-slate-50 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+            >
+              {columns.map((col) => (
+                <option key={col.id} value={col.id}>
+                  {col.title}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="px-6 py-4 border-t border-slate-700 flex justify-end gap-3">

@@ -1,13 +1,18 @@
 import { createContext, useContext } from 'react'
-import type { Task, TaskStatus } from '../types'
-import type { TaskAction } from './taskReducer'
+import type { Task, BoardColumn, ColumnColor } from '../types'
+import type { TaskAction, ColumnAction } from './taskReducer'
 
 export interface TaskContextValue {
   tasks: Task[]
+  columns: BoardColumn[]
   dispatch: React.Dispatch<TaskAction>
-  addTask: (title: string, description: string) => void
-  updateTask: (task: Task, changes: { title?: string; description?: string; status?: TaskStatus }) => void
+  dispatchColumns: React.Dispatch<ColumnAction>
+  addTask: (title: string, description: string, columnId: string) => void
+  updateTask: (task: Task, changes: { title?: string; description?: string; columnId?: string }) => void
   deleteTask: (id: string) => void
+  addColumn: (title: string, color: ColumnColor) => void
+  updateColumn: (column: BoardColumn) => void
+  deleteColumn: (id: string) => void
 }
 
 export const TaskContext = createContext<TaskContextValue | null>(null)

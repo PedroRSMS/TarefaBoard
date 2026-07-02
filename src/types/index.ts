@@ -1,1 +1,1 @@
-export type { Task, TaskStatus } from './task'
+export type { Task, BoardColumn, ColumnColor } from './task'

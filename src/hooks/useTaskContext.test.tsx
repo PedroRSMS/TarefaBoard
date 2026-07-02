@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { TaskProvider } from '../components/TaskProvider'
 import { useTaskContext } from './useTaskContext'
@@ -18,16 +18,21 @@ describe('useTaskContext', () => {
     expect(result.current.tasks).toEqual([])
   })
 
+  it('deve ter colunas padrão', () => {
+    const { result } = renderHook(() => useTaskContext(), { wrapper })
+    expect(result.current.columns).toHaveLength(3)
+  })
+
   it('deve adicionar uma tarefa', () => {
     const { result } = renderHook(() => useTaskContext(), { wrapper })
 
     act(() => {
-      result.current.addTask('Nova Tarefa', 'Descrição')
+      result.current.addTask('Nova Tarefa', 'Descrição', 'col-todo')
     })
 
     expect(result.current.tasks).toHaveLength(1)
     expect(result.current.tasks[0].title).toBe('Nova Tarefa')
-    expect(result.current.tasks[0].status).toBe('todo')
+    expect(result.current.tasks[0].columnId).toBe('col-todo')
   })
 
   it('deve lançar erro se usado fora do Provider', () => {

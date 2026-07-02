@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest'
 import { createTask, updateTaskData, validateTitle, validateDescription } from './taskUtils'
-import type { Task, TaskStatus } from '../types'
+import type { Task } from '../types'
 
 describe('taskUtils', () => {
   describe('createTask', () => {
-    it('deve criar uma tarefa com status todo', () => {
-      const task = createTask('Título', 'Descrição')
+    it('deve criar uma tarefa com columnId especificado', () => {
+      const task = createTask('Título', 'Descrição', 'col-todo')
       expect(task.title).toBe('Título')
       expect(task.description).toBe('Descrição')
-      expect(task.status).toBe('todo')
+      expect(task.columnId).toBe('col-todo')
       expect(task.id).toBeTruthy()
       expect(task.createdAt).toBeTruthy()
       expect(task.updatedAt).toBeTruthy()
@@ -49,7 +49,7 @@ describe('taskUtils', () => {
         id: '1',
         title: 'Original',
         description: '',
-        status: 'todo' as TaskStatus,
+        columnId: 'col-todo',
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
       }

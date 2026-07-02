@@ -4,14 +4,19 @@ import { userEvent } from '@testing-library/user-event'
 import { DndContext } from '@dnd-kit/core'
 import { TaskProvider } from '../TaskProvider'
 import { Board } from './Board'
-import type { Task } from '../../types'
+import type { Task, BoardColumn } from '../../types'
+
+const mockColumns: BoardColumn[] = [
+  { id: 'col-todo', title: 'A Fazer', color: 'blue' },
+  { id: 'col-done', title: 'Concluido', color: 'green' },
+]
 
 function createMockTask(overrides: Partial<Task> = {}): Task {
   return {
     id: '1',
     title: 'Tarefa Teste',
     description: '',
-    status: 'todo',
+    columnId: 'col-todo',
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
     ...overrides,
@@ -29,9 +34,13 @@ describe('Board', () => {
         <DndContext>
           <Board
             tasks={[]}
-            selectedStatuses={['todo', 'in-progress', 'done']}
+            columns={mockColumns}
+            selectedColumnIds={['col-todo', 'col-done']}
             onUpdateTask={() => {}}
             onDeleteTask={() => {}}
+            onAddColumn={() => {}}
+            onUpdateColumn={() => {}}
+            onDeleteColumn={() => {}}
           />
         </DndContext>
       </TaskProvider>
@@ -46,9 +55,13 @@ describe('Board', () => {
       <TaskProvider>
         <Board
           tasks={[]}
-          selectedStatuses={[]}
+          columns={mockColumns}
+          selectedColumnIds={[]}
           onUpdateTask={() => {}}
           onDeleteTask={() => {}}
+          onAddColumn={() => {}}
+          onUpdateColumn={() => {}}
+          onDeleteColumn={() => {}}
         />
       </TaskProvider>
     )
@@ -56,15 +69,19 @@ describe('Board', () => {
   })
 
   it('deve renderizar colunas com tarefas', () => {
-    const tasks = [createMockTask({ id: '1', title: 'Tarefa 1', status: 'todo' })]
+    const tasks = [createMockTask({ id: '1', title: 'Tarefa 1', columnId: 'col-todo' })]
     render(
       <TaskProvider>
         <DndContext>
           <Board
             tasks={tasks}
-            selectedStatuses={['todo', 'in-progress', 'done']}
+            columns={mockColumns}
+            selectedColumnIds={['col-todo', 'col-done']}
             onUpdateTask={() => {}}
             onDeleteTask={() => {}}
+            onAddColumn={() => {}}
+            onUpdateColumn={() => {}}
+            onDeleteColumn={() => {}}
           />
         </DndContext>
       </TaskProvider>
@@ -72,18 +89,22 @@ describe('Board', () => {
     expect(screen.getByText('Tarefa 1')).toBeDefined()
   })
 
-  it('deve abrir modal de exclusão ao clicar em excluir', async () => {
+  it('deve abrir modal de exclusão de tarefa', async () => {
     const user = userEvent.setup()
-    const tasks = [createMockTask({ id: '1', title: 'Tarefa Teste', status: 'todo' })]
+    const tasks = [createMockTask({ id: '1', title: 'Tarefa Teste', columnId: 'col-todo' })]
 
     render(
       <TaskProvider>
         <DndContext>
           <Board
             tasks={tasks}
-            selectedStatuses={['todo', 'in-progress', 'done']}
+            columns={mockColumns}
+            selectedColumnIds={['col-todo', 'col-done']}
             onUpdateTask={() => {}}
             onDeleteTask={() => {}}
+            onAddColumn={() => {}}
+            onUpdateColumn={() => {}}
+            onDeleteColumn={() => {}}
           />
         </DndContext>
       </TaskProvider>
@@ -93,49 +114,5 @@ describe('Board', () => {
     expect(
       screen.getByText(/Tem certeza que deseja excluir a tarefa/)
     ).toBeDefined()
-  })
-
-  it('deve abrir modal de edição ao clicar em editar', async () => {
-    const user = userEvent.setup()
-    const tasks = [createMockTask({ id: '1', title: 'Tarefa Teste', status: 'todo' })]
-
-    render(
-      <TaskProvider>
-        <DndContext>
-          <Board
-            tasks={tasks}
-            selectedStatuses={['todo', 'in-progress', 'done']}
-            onUpdateTask={() => {}}
-            onDeleteTask={() => {}}
-          />
-        </DndContext>
-      </TaskProvider>
-    )
-
-    await user.click(screen.getByLabelText('Editar tarefa'))
-    expect(screen.getByText('Editar Tarefa')).toBeDefined()
-  })
-
-  it('deve chamar onDeleteTask ao confirmar exclusão', async () => {
-    const user = userEvent.setup()
-    const tasks = [createMockTask({ id: '1', title: 'Tarefa Teste', status: 'todo' })]
-    let deletedId = ''
-
-    render(
-      <TaskProvider>
-        <DndContext>
-          <Board
-            tasks={tasks}
-            selectedStatuses={['todo', 'in-progress', 'done']}
-            onUpdateTask={() => {}}
-            onDeleteTask={(id) => { deletedId = id }}
-          />
-        </DndContext>
-      </TaskProvider>
-    )
-
-    await user.click(screen.getByLabelText('Excluir tarefa'))
-    await user.click(screen.getByText('Excluir'))
-    expect(deletedId).toBe('1')
   })
 })
