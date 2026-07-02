@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
+import { DndContext } from '@dnd-kit/core'
 import { TaskCard } from './TaskCard'
 import type { Task } from '../../types'
 
@@ -13,23 +14,31 @@ const mockTask: Task = {
   updatedAt: '2024-01-15T10:30:00.000Z',
 }
 
+function renderWithDnd(ui: React.ReactElement) {
+  return render(
+    <DndContext>
+      {ui}
+    </DndContext>
+  )
+}
+
 describe('TaskCard', () => {
   it('deve renderizar o título da tarefa', () => {
-    render(
+    renderWithDnd(
       <TaskCard task={mockTask} onEdit={() => {}} onDelete={() => {}} />
     )
     expect(screen.getByText('Minha Tarefa')).toBeDefined()
   })
 
   it('deve renderizar a descrição', () => {
-    render(
+    renderWithDnd(
       <TaskCard task={mockTask} onEdit={() => {}} onDelete={() => {}} />
     )
     expect(screen.getByText('Descrição da tarefa')).toBeDefined()
   })
 
   it('deve renderizar a data formatada', () => {
-    render(
+    renderWithDnd(
       <TaskCard task={mockTask} onEdit={() => {}} onDelete={() => {}} />
     )
     expect(screen.getByText('Criado em 15/01/2024')).toBeDefined()
@@ -38,7 +47,7 @@ describe('TaskCard', () => {
   it('deve chamar onEdit ao clicar no botão editar', async () => {
     const user = userEvent.setup()
     let called = false
-    render(
+    renderWithDnd(
       <TaskCard task={mockTask} onEdit={() => { called = true }} onDelete={() => {}} />
     )
     await user.click(screen.getByLabelText('Editar tarefa'))
@@ -48,7 +57,7 @@ describe('TaskCard', () => {
   it('deve chamar onDelete ao clicar no botão excluir', async () => {
     const user = userEvent.setup()
     let called = false
-    render(
+    renderWithDnd(
       <TaskCard task={mockTask} onEdit={() => {}} onDelete={() => { called = true }} />
     )
     await user.click(screen.getByLabelText('Excluir tarefa'))
@@ -57,7 +66,7 @@ describe('TaskCard', () => {
 
   it('não deve renderizar descrição quando vazia', () => {
     const taskWithoutDesc = { ...mockTask, description: '' }
-    render(
+    renderWithDnd(
       <TaskCard task={taskWithoutDesc} onEdit={() => {}} onDelete={() => {}} />
     )
     expect(screen.queryByText('Descrição da tarefa')).toBeNull()

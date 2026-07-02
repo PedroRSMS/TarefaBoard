@@ -1,3 +1,4 @@
+import { useDroppable } from '@dnd-kit/core'
 import type { Task, TaskStatus } from '../../types'
 import { STATUS_LABELS, STATUS_DOT_COLORS } from '../../constants/status'
 import { TaskCard } from './TaskCard'
@@ -10,6 +11,10 @@ interface ColumnProps {
 }
 
 export function Column({ status, tasks, onEdit, onDelete }: ColumnProps) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: status,
+  })
+
   return (
     <div className="flex flex-col bg-slate-800/50 border border-slate-700 rounded-xl min-h-[300px]">
       <div className="px-4 py-3 border-b border-slate-700 flex items-center gap-2">
@@ -21,8 +26,15 @@ export function Column({ status, tasks, onEdit, onDelete }: ColumnProps) {
           {tasks.length}
         </span>
       </div>
-      <div className="flex-1 p-3 space-y-3">
-        {tasks.length === 0 ? (
+      <div
+        ref={setNodeRef}
+        className={`flex-1 p-3 space-y-3 transition-colors duration-200 rounded-b-xl ${
+          isOver
+            ? 'bg-indigo-500/10 border-2 border-dashed border-indigo-500/40'
+            : ''
+        }`}
+      >
+        {tasks.length === 0 && !isOver ? (
           <p className="text-sm text-slate-500 text-center py-8">
             Nenhuma tarefa neste status
           </p>
@@ -35,6 +47,11 @@ export function Column({ status, tasks, onEdit, onDelete }: ColumnProps) {
               onDelete={onDelete}
             />
           ))
+        )}
+        {isOver && tasks.length === 0 && (
+          <p className="text-sm text-indigo-400 text-center py-8">
+            Solte aqui para mover
+          </p>
         )}
       </div>
     </div>

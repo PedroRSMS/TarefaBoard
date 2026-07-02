@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { DndContext } from '@dnd-kit/core'
 import { Column } from './Column'
 import type { Task } from '../../types'
 
@@ -22,30 +23,38 @@ const mockTasks: Task[] = [
   },
 ]
 
+function renderWithDnd(ui: React.ReactElement) {
+  return render(
+    <DndContext>
+      {ui}
+    </DndContext>
+  )
+}
+
 describe('Column', () => {
   it('deve renderizar o nome da coluna', () => {
-    render(
+    renderWithDnd(
       <Column status="todo" tasks={[]} onEdit={() => {}} onDelete={() => {}} />
     )
     expect(screen.getByText('A Fazer')).toBeDefined()
   })
 
   it('deve renderizar o contador de tarefas', () => {
-    render(
+    renderWithDnd(
       <Column status="todo" tasks={mockTasks} onEdit={() => {}} onDelete={() => {}} />
     )
     expect(screen.getByText('2')).toBeDefined()
   })
 
   it('deve mostrar mensagem quando vazia', () => {
-    render(
+    renderWithDnd(
       <Column status="todo" tasks={[]} onEdit={() => {}} onDelete={() => {}} />
     )
     expect(screen.getByText('Nenhuma tarefa neste status')).toBeDefined()
   })
 
   it('deve renderizar os cards das tarefas', () => {
-    render(
+    renderWithDnd(
       <Column status="todo" tasks={mockTasks} onEdit={() => {}} onDelete={() => {}} />
     )
     expect(screen.getByText('Tarefa 1')).toBeDefined()
