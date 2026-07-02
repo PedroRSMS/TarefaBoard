@@ -12,6 +12,7 @@ const mockColumns: BoardColumn[] = [
 function TestFiltersBar() {
   const [search, setSearch] = useState('')
   const [ids, setIds] = useState<string[]>(['col-todo'])
+  const [tagId, setTagId] = useState('')
   return (
     <FiltersBar
       search={search}
@@ -19,6 +20,8 @@ function TestFiltersBar() {
       columns={mockColumns}
       selectedColumnIds={ids}
       onColumnIdsChange={setIds}
+      selectedTagId={tagId}
+      onTagIdChange={setTagId}
     />
   )
 }

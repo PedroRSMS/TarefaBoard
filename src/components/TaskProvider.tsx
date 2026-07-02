@@ -25,15 +25,15 @@ export function TaskProvider({ children }: { children: ReactNode }) {
   }, [columns, setPersistedColumns])
 
   const addTask = useCallback(
-    (title: string, description: string, columnId: string) => {
-      const task = createTask(title, description, columnId)
+    (title: string, description: string, columnId: string, tagId?: string, dueDate?: string) => {
+      const task = createTask(title, description, columnId, tagId, dueDate)
       dispatch({ type: 'ADD_TASK', payload: task })
     },
     [dispatch]
   )
 
   const updateTask = useCallback(
-    (task: Task, changes: { title?: string; description?: string; columnId?: string }) => {
+    (task: Task, changes: { title?: string; description?: string; columnId?: string; tagId?: string; dueDate?: string }) => {
       const updated = updateTaskData(task, changes)
       dispatch({ type: 'UPDATE_TASK', payload: updated })
     },

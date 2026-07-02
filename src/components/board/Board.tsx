@@ -20,7 +20,7 @@ interface BoardProps {
   tasks: Task[]
   columns: BoardColumn[]
   selectedColumnIds: string[]
-  onUpdateTask: (task: Task, changes: { title?: string; description?: string; columnId?: string }) => void
+  onUpdateTask: (task: Task, changes: { title?: string; description?: string; columnId?: string; tagId?: string; dueDate?: string }) => void
   onDeleteTask: (id: string) => void
   onAddColumn: (title: string, color: ColumnColor) => void
   onUpdateColumn: (column: BoardColumn) => void
@@ -58,8 +58,15 @@ export function Board({
     return tasks.filter((task) => task.columnId === columnId)
   }
 
-  function handleUpdate(task: Task, title: string, description: string, columnId: string) {
-    onUpdateTask(task, { title, description, columnId })
+  function handleUpdate(
+    task: Task,
+    title: string,
+    description: string,
+    columnId: string,
+    tagId: string | undefined,
+    dueDate: string | undefined
+  ) {
+    onUpdateTask(task, { title, description, columnId, tagId, dueDate })
   }
 
   function handleDeleteConfirm() {
@@ -178,8 +185,8 @@ export function Board({
         <TaskForm
           isOpen={true}
           onClose={() => setEditingTask(null)}
-          onSubmit={(title, description, columnId) =>
-            handleUpdate(editingTask, title, description, columnId)
+          onSubmit={(title, description, columnId, tagId, dueDate) =>
+            handleUpdate(editingTask, title, description, columnId, tagId, dueDate)
           }
           columns={columns}
           initialTask={editingTask}

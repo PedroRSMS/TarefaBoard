@@ -1,7 +1,13 @@
 import { v4 as uuid } from 'uuid'
 import type { Task } from '../types'
 
-export function createTask(title: string, description: string, columnId: string): Task {
+export function createTask(
+  title: string,
+  description: string,
+  columnId: string,
+  tagId?: string,
+  dueDate?: string
+): Task {
   const now = new Date().toISOString()
   return {
     id: uuid(),
@@ -10,12 +16,20 @@ export function createTask(title: string, description: string, columnId: string)
     columnId,
     createdAt: now,
     updatedAt: now,
+    tagId: tagId || undefined,
+    dueDate: dueDate || undefined,
   }
 }
 
 export function updateTaskData(
   task: Task,
-  changes: { title?: string; description?: string; columnId?: string }
+  changes: {
+    title?: string
+    description?: string
+    columnId?: string
+    tagId?: string
+    dueDate?: string
+  }
 ): Task {
   return {
     ...task,

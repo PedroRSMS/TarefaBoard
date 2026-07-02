@@ -24,6 +24,7 @@ function AppContent() {
   const [selectedColumnIds, setSelectedColumnIds] = useState<string[]>(
     () => columns.map((c) => c.id)
   )
+  const [selectedTagId, setSelectedTagId] = useState<string>('')
 
   const debouncedSearch = useDebounce(search, 300)
 
@@ -32,15 +33,17 @@ function AppContent() {
       const matchesColumn = selectedColumnIds.includes(task.columnId)
       if (!matchesColumn) return false
 
+      if (selectedTagId && task.tagId !== selectedTagId) return false
+
       if (debouncedSearch.trim() === '') return true
 
       return task.title.toLowerCase().includes(debouncedSearch.toLowerCase().trim())
     })
-  }, [tasks, selectedColumnIds, debouncedSearch])
+  }, [tasks, selectedColumnIds, selectedTagId, debouncedSearch])
 
   const handleCreate = useCallback(
-    (title: string, description: string, columnId: string) => {
-      addTask(title, description, columnId)
+    (title: string, description: string, columnId: string, tagId: string | undefined, dueDate: string | undefined) => {
+      addTask(title, description, columnId, tagId, dueDate)
     },
     [addTask]
   )
@@ -66,6 +69,8 @@ function AppContent() {
         columns={columns}
         selectedColumnIds={selectedColumnIds}
         onColumnIdsChange={setSelectedColumnIds}
+        selectedTagId={selectedTagId}
+        onTagIdChange={setSelectedTagId}
       />
 
       <Board

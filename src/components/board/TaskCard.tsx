@@ -1,8 +1,9 @@
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Trash2, Calendar } from 'lucide-react'
 import type { Task } from '../../types'
-import { formatDate } from '../../utils/formatDate'
+import { formatDate, formatDueDate, getDueDateStatus } from '../../utils/formatDate'
+import { getTagById, TAG_COLOR_CHIP, TAG_COLOR_DOT } from '../../constants/tags'
 
 interface TaskCardProps {
   task: Task
@@ -28,6 +29,17 @@ export function TaskCard({ task, onEdit, onDelete, isDragOverlay }: TaskCardProp
   } ${isDragOverlay ? 'cursor-grabbing shadow-xl' : 'cursor-grab'}`
   const activeClasses = isDragOverlay ? '' : 'active:cursor-grabbing'
 
+  const tag = task.tagId ? getTagById(task.tagId) : undefined
+  const dueStatus = getDueDateStatus(task.dueDate)
+  const dueDateFormatted = formatDueDate(task.dueDate)
+
+  const dueDateColor =
+    dueStatus === 'overdue'
+      ? 'text-red-400'
+      : dueStatus === 'today'
+        ? 'text-amber-400'
+        : 'text-slate-500'
+
   return (
     <div
       ref={setNodeRef}
@@ -40,6 +52,17 @@ export function TaskCard({ task, onEdit, onDelete, isDragOverlay }: TaskCardProp
       aria-describedby={`task-${task.id}-title`}
       tabIndex={0}
     >
+      {tag && (
+        <div className="mb-2">
+          <span
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${TAG_COLOR_CHIP[tag.color]}`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${TAG_COLOR_DOT[tag.color]}`} />
+            {tag.label}
+          </span>
+        </div>
+      )}
+
       <div className="flex items-start justify-between gap-2 mb-2">
         <h3
           id={`task-${task.id}-title`}
@@ -74,9 +97,18 @@ export function TaskCard({ task, onEdit, onDelete, isDragOverlay }: TaskCardProp
         </p>
       )}
 
-      <p className="text-xs text-slate-500">
-        Criado em {formatDate(task.createdAt)}
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-slate-500">
+          Criado em {formatDate(task.createdAt)}
+        </p>
+
+        {dueDateFormatted && (
+          <p className={`text-xs flex items-center gap-1 ${dueDateColor}`}>
+            <Calendar size={12} />
+            {dueDateFormatted}
+          </p>
+        )}
+      </div>
     </div>
   )
 }

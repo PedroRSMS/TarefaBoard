@@ -1,12 +1,19 @@
 import { useState, type FormEvent } from 'react'
 import type { Task, BoardColumn } from '../../types'
 import { validateTitle, validateDescription } from '../../utils/taskUtils'
+import { TAGS } from '../../constants/tags'
 import { Modal } from '../ui/Modal'
 
 interface TaskFormProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (title: string, description: string, columnId: string) => void
+  onSubmit: (
+    title: string,
+    description: string,
+    columnId: string,
+    tagId: string | undefined,
+    dueDate: string | undefined
+  ) => void
   columns: BoardColumn[]
   initialTask?: Task
   submitLabel: string
@@ -24,6 +31,8 @@ export function TaskForm({
   const [title, setTitle] = useState(initialTask?.title ?? '')
   const [description, setDescription] = useState(initialTask?.description ?? '')
   const [columnId, setColumnId] = useState(defaultColumnId)
+  const [tagId, setTagId] = useState(initialTask?.tagId ?? '')
+  const [dueDate, setDueDate] = useState(initialTask?.dueDate ?? '')
 
   const titleError = validateTitle(title)
   const descriptionError = validateDescription(description)
@@ -32,11 +41,19 @@ export function TaskForm({
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!isValid) return
-    onSubmit(title.trim(), description.trim(), columnId)
+    onSubmit(
+      title.trim(),
+      description.trim(),
+      columnId,
+      tagId || undefined,
+      dueDate || undefined
+    )
     if (!initialTask) {
       setTitle('')
       setDescription('')
       setColumnId(columns[0]?.id ?? '')
+      setTagId('')
+      setDueDate('')
     }
     onClose()
   }
@@ -45,6 +62,8 @@ export function TaskForm({
     setTitle(initialTask?.title ?? '')
     setDescription(initialTask?.description ?? '')
     setColumnId(defaultColumnId)
+    setTagId(initialTask?.tagId ?? '')
+    setDueDate(initialTask?.dueDate ?? '')
     onClose()
   }
 
@@ -97,19 +116,53 @@ export function TaskForm({
             )}
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="task-column" className="block text-sm font-medium text-slate-300 mb-1">
+                Coluna
+              </label>
+              <select
+                id="task-column"
+                value={columnId}
+                onChange={(e) => setColumnId(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-slate-50 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+              >
+                {columns.map((col) => (
+                  <option key={col.id} value={col.id}>
+                    {col.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="task-duedate" className="block text-sm font-medium text-slate-300 mb-1">
+                Data de Entrega
+              </label>
+              <input
+                id="task-duedate"
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-slate-50 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+              />
+            </div>
+          </div>
+
           <div>
-            <label htmlFor="task-status" className="block text-sm font-medium text-slate-300 mb-1">
-              Coluna
+            <label htmlFor="task-tag" className="block text-sm font-medium text-slate-300 mb-1">
+              Etiqueta
             </label>
             <select
-              id="task-status"
-              value={columnId}
-              onChange={(e) => setColumnId(e.target.value)}
+              id="task-tag"
+              value={tagId}
+              onChange={(e) => setTagId(e.target.value)}
               className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-slate-50 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
             >
-              {columns.map((col) => (
-                <option key={col.id} value={col.id}>
-                  {col.title}
+              <option value="">Nenhuma</option>
+              {TAGS.map((tag) => (
+                <option key={tag.id} value={tag.id}>
+                  {tag.label}
                 </option>
               ))}
             </select>

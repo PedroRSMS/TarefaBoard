@@ -7,8 +7,8 @@ export interface TaskContextValue {
   columns: BoardColumn[]
   dispatch: React.Dispatch<TaskAction>
   dispatchColumns: React.Dispatch<ColumnAction>
-  addTask: (title: string, description: string, columnId: string) => void
-  updateTask: (task: Task, changes: { title?: string; description?: string; columnId?: string }) => void
+  addTask: (title: string, description: string, columnId: string, tagId?: string, dueDate?: string) => void
+  updateTask: (task: Task, changes: { title?: string; description?: string; columnId?: string; tagId?: string; dueDate?: string }) => void
   deleteTask: (id: string) => void
   addColumn: (title: string, color: ColumnColor) => void
   updateColumn: (column: BoardColumn) => void
