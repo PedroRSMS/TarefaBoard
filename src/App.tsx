@@ -1,13 +1,33 @@
-import { useState, useCallback } from 'react'
-import { LayoutDashboard } from 'lucide-react'
+import { useState, useMemo, useCallback } from 'react'
+import type { TaskStatus } from './types'
+import { STATUS_ORDER } from './constants/status'
 import { TaskProvider } from './components/TaskProvider'
 import { useTaskContext } from './hooks/useTaskContext'
+import { useDebounce } from './hooks/useDebounce'
+import { LayoutDashboard } from 'lucide-react'
 import { Board } from './components/board/Board'
 import { TaskForm } from './components/board/TaskForm'
+import { FiltersBar } from './components/filters/FiltersBar'
 
 function AppContent() {
-  const { addTask } = useTaskContext()
+  const { tasks, addTask, updateTask, deleteTask } = useTaskContext()
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const [selectedStatuses, setSelectedStatuses] = useState<TaskStatus[]>([...STATUS_ORDER])
+
+  const debouncedSearch = useDebounce(search, 300)
+
+  const filteredTasks = useMemo(() => {
+    return tasks.filter((task) => {
+      const matchesStatus = selectedStatuses.includes(task.status)
+      if (!matchesStatus) return false
+
+      if (debouncedSearch.trim() === '') return true
+
+      return task.title.toLowerCase().includes(debouncedSearch.toLowerCase().trim())
+    })
+  }, [tasks, selectedStatuses, debouncedSearch])
 
   const handleCreate = useCallback(
     (title: string, description: string) => {
@@ -31,7 +51,19 @@ function AppContent() {
         </button>
       </header>
 
-      <Board />
+      <FiltersBar
+        search={search}
+        onSearchChange={setSearch}
+        selectedStatuses={selectedStatuses}
+        onStatusesChange={setSelectedStatuses}
+      />
+
+      <Board
+        tasks={filteredTasks}
+        selectedStatuses={selectedStatuses}
+        onUpdateTask={updateTask}
+        onDeleteTask={deleteTask}
+      />
 
       <TaskForm
         isOpen={isCreateModalOpen}

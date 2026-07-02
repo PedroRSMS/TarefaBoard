@@ -10,15 +10,19 @@ import {
 } from '@dnd-kit/core'
 import type { Task, TaskStatus } from '../../types'
 import { STATUS_ORDER } from '../../constants/status'
-import { useTaskContext } from '../../hooks/useTaskContext'
 import { Column } from './Column'
 import { TaskCard } from './TaskCard'
 import { TaskForm } from './TaskForm'
 import { ConfirmDeleteModal } from './ConfirmDeleteModal'
 
-export function Board() {
-  const { tasks, updateTask, deleteTask } = useTaskContext()
+interface BoardProps {
+  tasks: Task[]
+  selectedStatuses: TaskStatus[]
+  onUpdateTask: (task: Task, changes: { title?: string; description?: string; status?: TaskStatus }) => void
+  onDeleteTask: (id: string) => void
+}
 
+export function Board({ tasks, selectedStatuses, onUpdateTask, onDeleteTask }: BoardProps) {
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [deletingTask, setDeletingTask] = useState<Task | null>(null)
   const [activeTask, setActiveTask] = useState<Task | null>(null)
@@ -36,12 +40,12 @@ export function Board() {
   }
 
   function handleUpdate(task: Task, title: string, description: string, status: TaskStatus) {
-    updateTask(task, { title, description, status })
+    onUpdateTask(task, { title, description, status })
   }
 
   function handleDeleteConfirm() {
     if (deletingTask) {
-      deleteTask(deletingTask.id)
+      onDeleteTask(deletingTask.id)
       setDeletingTask(null)
     }
   }
@@ -65,7 +69,15 @@ export function Board() {
     const newStatus = over.id as TaskStatus
     if (newStatus === task.status) return
 
-    updateTask(task, { status: newStatus })
+    onUpdateTask(task, { status: newStatus })
+  }
+
+  if (selectedStatuses.length === 0) {
+    return (
+      <div className="flex-1 px-4 sm:px-8 py-4 sm:py-6 overflow-auto flex items-center justify-center">
+        <p className="text-slate-400 text-lg">Selecione ao menos um status</p>
+      </div>
+    )
   }
 
   return (
@@ -78,9 +90,8 @@ export function Board() {
         {tasks.length === 0 ? (
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
-              <p className="text-slate-400 text-lg mb-2">Nenhuma tarefa encontrada</p>
-              <p className="text-slate-500 text-sm">
-                Clique em &ldquo;Nova Tarefa&rdquo; para começar
+              <p className="text-slate-400 text-lg mb-2">
+                Nenhuma tarefa encontrada para os filtros atuais
               </p>
             </div>
           </div>
