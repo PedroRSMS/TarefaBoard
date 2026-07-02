@@ -1,9 +1,19 @@
-Neste Estudo Dirigido, cada aluno deve criar um novo repositório com um conjunto de especificações, utilizando Spec Driven Development, para um projeto de frontend. Não é necessário que o projeto seja implementado, o importante são os arquivos que orientam um agente de IA a desenvolver um projeto de software. A seguir são listadas as especificações importantes que devem conter em um repositório:
+# Aviso
 
-1- AGENTS.md: Arquivo que define as regras para o comportamento do agente durante o desenvolvimento do projeto.
+Caros alunos,
+Como informado em aula, vamos iniciar nosso último trabalho da disciplina, que consiste em desenvolver um projeto completo de Frontend e fazer o deploy no Github Pages. Esse projeto poderá ser desenvolvido em dupla e deverá ser apresentado em sala de aula.
 
-2- specs.md: Arquivo com definições das funcionalidades da sua aplicação. Aqui devem ser descritas em detalhes como deve funcionar cada funcionalidade, prioridades de implementação (qual funcionalidade deve ser desenvolvida primeiro), bibliotecas a serem utilizadas e quaisquer outras definições importantes do projeto.
+Etapas importantes que devem ser apresentadas:
+1- O repositório do Github, com README.md explicando o que é o projeto e como executá-lo;
+2- Estrutura de componentes;
+3- Ideia de design do frontend;
+4- Arquivos utilizados para guiar o agente no desenvolvimento (AGENTS.md, skills, etc);
+5- Página onde o projeto foi deployado no Github Pages.
 
-3- design.md: Orientações de design para o projeto, como cores, fontes e outras definições para padronizar o desenvolvimento de novos componentes e páginas da aplicação.
+Cada etapa entregue vale 2 pontos durante a apresentação.
 
-Dica importante: Utilizem bastante as ferramentas de IA, como Claude, ChatGPt e Gemini, para definir uma aplicação e conseguir ajuda para desenvolver os arquivos markdown. Vocês não precisam escrever nenhum arquivo, mas precisam orientar a IA para que ela desenvolva boas especificações.
+A entrega no Google Classroom deve ser realizada no dia anterior à apresentação, informando o link para o repositório do projeto.
+
+Vocês estão livres para definirem os próprios projetos. Contudo, o projeto não pode ser simples como Pokédex, sistema de gerenciamento de livros em uma biblioteca, ou uma aplicação de avaliação de filmes. Os projetos precisam ser mais elaborados, tendo em vista que poderão utilizar IA durante o desenvolvimento. Caso o projeto apresentado seja considerado de baixa complexidade, serão descontados 5 pontos do trabalho.
+
+Boa sorte!
