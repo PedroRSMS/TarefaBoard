@@ -14,6 +14,7 @@ function AppContent() {
     addTask,
     updateTask,
     deleteTask,
+    reorderTask,
     addColumn,
     updateColumn,
     deleteColumn,
@@ -29,16 +30,18 @@ function AppContent() {
   const debouncedSearch = useDebounce(search, 300)
 
   const filteredTasks = useMemo(() => {
-    return tasks.filter((task) => {
-      const matchesColumn = selectedColumnIds.includes(task.columnId)
-      if (!matchesColumn) return false
+    return tasks
+      .filter((task) => {
+        const matchesColumn = selectedColumnIds.includes(task.columnId)
+        if (!matchesColumn) return false
 
-      if (selectedTagId && task.tagId !== selectedTagId) return false
+        if (selectedTagId && task.tagId !== selectedTagId) return false
 
-      if (debouncedSearch.trim() === '') return true
+        if (debouncedSearch.trim() === '') return true
 
-      return task.title.toLowerCase().includes(debouncedSearch.toLowerCase().trim())
-    })
+        return task.title.toLowerCase().includes(debouncedSearch.toLowerCase().trim())
+      })
+      .sort((a, b) => a.order - b.order)
   }, [tasks, selectedColumnIds, selectedTagId, debouncedSearch])
 
   const handleCreate = useCallback(
@@ -79,6 +82,7 @@ function AppContent() {
         selectedColumnIds={selectedColumnIds}
         onUpdateTask={updateTask}
         onDeleteTask={deleteTask}
+        onReorderTask={reorderTask}
         onAddColumn={addColumn}
         onUpdateColumn={updateColumn}
         onDeleteColumn={deleteColumn}

@@ -19,6 +19,7 @@ export interface Task {
   title: string
   description: string
   columnId: string
+  order: number
   readonly createdAt: string
   updatedAt: string
   tagId?: string

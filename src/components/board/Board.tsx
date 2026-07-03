@@ -5,6 +5,7 @@ import {
   useSensors,
   useSensor,
   PointerSensor,
+  TouchSensor,
   type DragStartEvent,
   type DragEndEvent,
 } from '@dnd-kit/core'
@@ -22,6 +23,7 @@ interface BoardProps {
   selectedColumnIds: string[]
   onUpdateTask: (task: Task, changes: { title?: string; description?: string; columnId?: string; tagId?: string; dueDate?: string }) => void
   onDeleteTask: (id: string) => void
+  onReorderTask: (activeId: string, overId: string) => void
   onAddColumn: (title: string, color: ColumnColor) => void
   onUpdateColumn: (column: BoardColumn) => void
   onDeleteColumn: (id: string) => void
@@ -33,6 +35,7 @@ export function Board({
   selectedColumnIds,
   onUpdateTask,
   onDeleteTask,
+  onReorderTask,
   onAddColumn,
   onUpdateColumn,
   onDeleteColumn,
@@ -50,6 +53,12 @@ export function Board({
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 8,
       },
     })
   )
@@ -108,10 +117,21 @@ export function Board({
     const task = tasks.find((t) => t.id === active.id)
     if (!task) return
 
-    const newColumnId = over.id as string
-    if (newColumnId === task.columnId) return
+    const overTask = tasks.find((t) => t.id === over.id)
 
-    onUpdateTask(task, { columnId: newColumnId })
+    if (overTask) {
+      if (overTask.columnId === task.columnId) {
+        onReorderTask(task.id, overTask.id)
+      } else {
+        onUpdateTask(task, { columnId: overTask.columnId })
+      }
+      return
+    }
+
+    const newColumnId = over.id as string
+    if (newColumnId !== task.columnId) {
+      onUpdateTask(task, { columnId: newColumnId })
+    }
   }
 
   if (selectedColumnIds.length === 0) {

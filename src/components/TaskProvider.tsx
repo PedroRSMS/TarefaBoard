@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useCallback, type ReactNode } from 'react'
+import { useReducer, useEffect, useCallback, useMemo, type ReactNode } from 'react'
 import type { Task, BoardColumn, ColumnColor } from '../types'
 import { taskReducer, columnReducer } from '../hooks/taskReducer'
 import { createTask, updateTaskData } from '../utils/taskUtils'
@@ -7,13 +7,36 @@ import { useLocalStorage } from '../hooks/useLocalStorage'
 import { STORAGE_KEY_TASKS, STORAGE_KEY_COLUMNS } from '../constants/status'
 import { TaskContext } from '../hooks/useTaskContext'
 
+function normalizeTasks(tasks: Task[]): Task[] {
+  const hasMissingOrder = tasks.some((task) => task.order === undefined)
+  if (!hasMissingOrder) return tasks
+
+  const byColumn = new Map<string, Task[]>()
+  tasks.forEach((task) => {
+    const list = byColumn.get(task.columnId) ?? []
+    list.push(task)
+    byColumn.set(task.columnId, list)
+  })
+
+  const result: Task[] = []
+  byColumn.forEach((columnTasks) => {
+    columnTasks.forEach((task, index) => {
+      result.push({ ...task, order: task.order ?? index })
+    })
+  })
+
+  return result
+}
+
 export function TaskProvider({ children }: { children: ReactNode }) {
   const [persistedTasks, setPersistedTasks] = useLocalStorage<Task[]>(STORAGE_KEY_TASKS, [])
   const [persistedColumns, setPersistedColumns] = useLocalStorage<BoardColumn[]>(
     STORAGE_KEY_COLUMNS,
     getDefaultColumns()
   )
-  const [tasks, dispatch] = useReducer(taskReducer, persistedTasks)
+
+  const normalizedTasks = useMemo(() => normalizeTasks(persistedTasks), [persistedTasks])
+  const [tasks, dispatch] = useReducer(taskReducer, normalizedTasks)
   const [columns, dispatchColumns] = useReducer(columnReducer, persistedColumns)
 
   useEffect(() => {
@@ -26,10 +49,13 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
   const addTask = useCallback(
     (title: string, description: string, columnId: string, tagId?: string, dueDate?: string) => {
-      const task = createTask(title, description, columnId, tagId, dueDate)
+      const order = tasks
+        .filter((task) => task.columnId === columnId)
+        .reduce((max, task) => Math.max(max, task.order), -1) + 1
+      const task = createTask(title, description, columnId, order, tagId, dueDate)
       dispatch({ type: 'ADD_TASK', payload: task })
     },
-    [dispatch]
+    [dispatch, tasks]
   )
 
   const updateTask = useCallback(
@@ -43,6 +69,13 @@ export function TaskProvider({ children }: { children: ReactNode }) {
   const deleteTask = useCallback(
     (id: string) => {
       dispatch({ type: 'DELETE_TASK', payload: id })
+    },
+    [dispatch]
+  )
+
+  const reorderTask = useCallback(
+    (activeId: string, overId: string) => {
+      dispatch({ type: 'REORDER_TASKS', payload: { activeId, overId } })
     },
     [dispatch]
   )
@@ -82,6 +115,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         addTask,
         updateTask,
         deleteTask,
+        reorderTask,
         addColumn,
         updateColumn,
         deleteColumn,

@@ -8,15 +8,26 @@ const mockTask: Task = {
   title: 'Teste',
   description: '',
   columnId: 'col-todo',
+  order: 0,
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-01T00:00:00.000Z',
 }
 
 describe('taskReducer', () => {
-  it('deve adicionar uma tarefa', () => {
+  it('deve adicionar uma tarefa com order correto', () => {
     const state = taskReducer([], { type: 'ADD_TASK', payload: mockTask })
     expect(state).toHaveLength(1)
     expect(state[0]).toEqual(mockTask)
+  })
+
+  it('deve incrementar order ao adicionar tarefas na mesma coluna', () => {
+    const first = taskReducer([], { type: 'ADD_TASK', payload: mockTask })
+    const second = taskReducer(first, {
+      type: 'ADD_TASK',
+      payload: { ...mockTask, id: '2', order: 0 },
+    })
+    expect(second[0].order).toBe(0)
+    expect(second[1].order).toBe(1)
   })
 
   it('deve atualizar uma tarefa', () => {
@@ -35,13 +46,25 @@ describe('taskReducer', () => {
     expect(state).toHaveLength(1)
   })
 
-  it('deve mover tarefa para outra coluna', () => {
+  it('deve mover tarefa para outra coluna e ajustar order', () => {
     const state = taskReducer([mockTask], {
       type: 'MOVE_TASK_TO_COLUMN',
       payload: { taskId: '1', columnId: 'col-done', updatedAt: '2024-02-01T00:00:00.000Z' },
     })
     expect(state[0].columnId).toBe('col-done')
+    expect(state[0].order).toBe(0)
     expect(state[0].updatedAt).toBe('2024-02-01T00:00:00.000Z')
+  })
+
+  it('deve reordenar tarefas na mesma coluna', () => {
+    const taskA: Task = { ...mockTask, id: 'a', order: 0 }
+    const taskB: Task = { ...mockTask, id: 'b', order: 1 }
+    const state = taskReducer([taskA, taskB], {
+      type: 'REORDER_TASKS',
+      payload: { activeId: 'b', overId: 'a' },
+    })
+    expect(state.find((t) => t.id === 'b')?.order).toBe(0)
+    expect(state.find((t) => t.id === 'a')?.order).toBe(1)
   })
 
   it('deve retornar o estado atual para ação desconhecida', () => {

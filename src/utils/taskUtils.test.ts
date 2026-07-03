@@ -4,11 +4,12 @@ import type { Task } from '../types'
 
 describe('taskUtils', () => {
   describe('createTask', () => {
-    it('deve criar uma tarefa com columnId especificado', () => {
-      const task = createTask('Título', 'Descrição', 'col-todo')
+    it('deve criar uma tarefa com columnId e order especificados', () => {
+      const task = createTask('Título', 'Descrição', 'col-todo', 2)
       expect(task.title).toBe('Título')
       expect(task.description).toBe('Descrição')
       expect(task.columnId).toBe('col-todo')
+      expect(task.order).toBe(2)
       expect(task.id).toBeTruthy()
       expect(task.createdAt).toBeTruthy()
       expect(task.updatedAt).toBeTruthy()
@@ -50,6 +51,7 @@ describe('taskUtils', () => {
         title: 'Original',
         description: '',
         columnId: 'col-todo',
+        order: 0,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
       }
@@ -58,6 +60,7 @@ describe('taskUtils', () => {
       expect(updated.updatedAt).not.toBe(task.updatedAt)
       expect(updated.id).toBe(task.id)
       expect(updated.createdAt).toBe(task.createdAt)
+      expect(updated.order).toBe(task.order)
     })
   })
 })

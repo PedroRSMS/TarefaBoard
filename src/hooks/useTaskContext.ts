@@ -10,6 +10,7 @@ export interface TaskContextValue {
   addTask: (title: string, description: string, columnId: string, tagId?: string, dueDate?: string) => void
   updateTask: (task: Task, changes: { title?: string; description?: string; columnId?: string; tagId?: string; dueDate?: string }) => void
   deleteTask: (id: string) => void
+  reorderTask: (activeId: string, overId: string) => void
   addColumn: (title: string, color: ColumnColor) => void
   updateColumn: (column: BoardColumn) => void
   deleteColumn: (id: string) => void

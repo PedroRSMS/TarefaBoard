@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import { DndContext } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { TaskCard } from './TaskCard'
 import type { Task } from '../../types'
 
@@ -10,6 +11,7 @@ const mockTask: Task = {
   title: 'Minha Tarefa',
   description: 'Descrição da tarefa',
   columnId: 'col-todo',
+  order: 0,
   createdAt: '2024-01-15T10:30:00.000Z',
   updatedAt: '2024-01-15T10:30:00.000Z',
 }
@@ -17,7 +19,9 @@ const mockTask: Task = {
 function renderWithDnd(ui: React.ReactElement) {
   return render(
     <DndContext>
-      {ui}
+      <SortableContext items={['1']} strategy={verticalListSortingStrategy}>
+        {ui}
+      </SortableContext>
     </DndContext>
   )
 }
@@ -54,13 +58,22 @@ describe('TaskCard', () => {
     expect(called).toBe(true)
   })
 
-  it('deve chamar onDelete ao clicar no botão excluir', async () => {
-    const user = userEvent.setup()
+  it('deve chamar onDelete ao clicar no botão excluir', () => {
     let called = false
     renderWithDnd(
       <TaskCard task={mockTask} onEdit={() => {}} onDelete={() => { called = true }} />
     )
-    await user.click(screen.getByLabelText('Excluir tarefa'))
+    fireEvent.click(screen.getByLabelText('Excluir tarefa'))
+    expect(called).toBe(true)
+  })
+
+  it('deve chamar onEdit ao dar duplo clique no card', async () => {
+    const user = userEvent.setup()
+    let called = false
+    renderWithDnd(
+      <TaskCard task={mockTask} onEdit={() => { called = true }} onDelete={() => {}} />
+    )
+    await user.dblClick(screen.getByText('Minha Tarefa'))
     expect(called).toBe(true)
   })
 

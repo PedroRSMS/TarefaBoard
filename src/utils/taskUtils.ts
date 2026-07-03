@@ -5,6 +5,7 @@ export function createTask(
   title: string,
   description: string,
   columnId: string,
+  order: number,
   tagId?: string,
   dueDate?: string
 ): Task {
@@ -14,6 +15,7 @@ export function createTask(
     title: title.trim(),
     description: description.trim(),
     columnId,
+    order,
     createdAt: now,
     updatedAt: now,
     tagId: tagId || undefined,
@@ -27,6 +29,7 @@ export function updateTaskData(
     title?: string
     description?: string
     columnId?: string
+    order?: number
     tagId?: string
     dueDate?: string
   }

@@ -1,4 +1,5 @@
 import { useDroppable } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { Pencil, Trash2 } from 'lucide-react'
 import type { Task, BoardColumn } from '../../types'
 import { COLUMN_COLOR_DOT } from '../../constants/status'
@@ -17,6 +18,8 @@ export function Column({ column, tasks, onEdit, onDelete, onEditColumn, onDelete
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
   })
+
+  const taskIds = tasks.map((task) => task.id)
 
   return (
     <div className="flex flex-col bg-slate-800/50 border border-slate-700 rounded-xl min-h-[300px]">
@@ -58,14 +61,19 @@ export function Column({ column, tasks, onEdit, onDelete, onEditColumn, onDelete
             Nenhuma tarefa neste status
           </p>
         ) : (
-          tasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          ))
+          <SortableContext
+            items={taskIds}
+            strategy={verticalListSortingStrategy}
+          >
+            {tasks.map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ))}
+          </SortableContext>
         )}
         {isOver && tasks.length === 0 && (
           <p className="text-sm text-indigo-400 text-center py-8">

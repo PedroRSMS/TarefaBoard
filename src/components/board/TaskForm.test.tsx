@@ -12,6 +12,7 @@ const mockTask: Task = {
   title: 'Tarefa Original',
   description: 'Descrição original',
   columnId: 'col-todo',
+  order: 0,
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-01T00:00:00.000Z',
 }
@@ -106,5 +107,21 @@ describe('TaskForm', () => {
     expect(
       screen.getByText('O título é obrigatório (máx. 120 caracteres)')
     ).toBeDefined()
+  })
+
+  it('deve chamar onClose ao clicar em Cancelar', async () => {
+    const user = userEvent.setup()
+    let closed = false
+    render(
+      <TaskForm
+        isOpen={true}
+        onClose={() => { closed = true }}
+        onSubmit={() => {}}
+        columns={mockColumns}
+        submitLabel="Criar"
+      />
+    )
+    await user.click(screen.getByText('Cancelar'))
+    expect(closed).toBe(true)
   })
 })
